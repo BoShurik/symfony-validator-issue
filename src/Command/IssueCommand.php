@@ -11,6 +11,7 @@ use App\Model\Foo;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
+use Symfony\Component\Validator\Constraints\Count;
 use Symfony\Component\Validator\ConstraintViolationInterface;
 use Symfony\Component\Validator\Validator\ValidatorInterface;
 
@@ -57,6 +58,22 @@ class IssueCommand extends Command
             "bars: This value should not be blank." <- not expected
             "bars[0].name: This value should not be blank."
             "bars[1].name: This value should not be blank."
+         */
+
+        $violations = $this->validator->validate($model->bars, new Count([
+            'min' => 3,
+            'max' => 3,
+        ]));
+        /** @var ConstraintViolationInterface $violation */
+        foreach ($violations as $violation) {
+            dump(sprintf('%s: %s', $violation->getPropertyPath(), $violation->getMessage()));
+        }
+
+        /*
+            Got:
+            ": This collection should contain exactly 3 elements."
+            "[0].name: This value should not be blank." <- not expected
+            "[1].name: This value should not be blank." <- not expected
          */
     }
 }
